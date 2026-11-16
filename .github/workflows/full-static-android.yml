@@ -248,13 +248,30 @@ jobs:
             -Dinstalled_tests=false \
             -Dintrospection=disabled \
             -Dman-pages=disabled \
-            -Ddocumentation=disabled \
+            -Ddocumentation=false \
             -Dlibmount=disabled \
             -Dselinux=disabled \
             -Dxattr=false
 
           meson compile -C glib-build -j"$(nproc)"
           meson install -C glib-build
+
+      - name: Show GLib Meson logs on failure
+        if: failure()
+        run: |
+          echo "========== MESON LOGS =========="
+
+          if [ -d glib-build/meson-logs ]; then
+            for log in glib-build/meson-logs/*.txt; do
+              [ -f "$log" ] || continue
+
+              echo ""
+              echo "========== $log =========="
+              cat "$log"
+            done
+          else
+            echo "Meson log directory does not exist."
+          fi
 
       # --------------------------------------------------
       # Verify dependency installation
