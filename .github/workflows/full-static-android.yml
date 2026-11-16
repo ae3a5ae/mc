@@ -1,8 +1,8 @@
-
 name: android-arm64-static
 
 on:
   workflow_dispatch:
+
 
 jobs:
   build-android-arm64:
@@ -20,347 +20,354 @@ jobs:
       BUILD_TRIPLET: x86_64-pc-linux-gnu
 
     steps:
-      # --------------------------------------------------
-      # Checkout and host tools
-      # --------------------------------------------------
+    # --------------------------------------------------
+    # Checkout and host tools
+    # --------------------------------------------------
 
-      - uses: actions/checkout@v7
+    - uses: actions/checkout@v7
 
-      - name: Install host build tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            autoconf \
-            automake \
-            autopoint \
-            gettext \
-            libtool \
-            pkg-config \
-            meson \
-            ninja-build \
-            python3 \
-            curl \
-            xz-utils \
-            bzip2 \
-            file
+    - name: Install host build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          autoconf \
+          automake \
+          autopoint \
+          gettext \
+          libtool \
+          pkg-config \
+          meson \
+          ninja-build \
+          python3 \
+          curl \
+          xz-utils \
+          bzip2 \
+          file
 
-      # --------------------------------------------------
-      # Android NDK
-      # --------------------------------------------------
+    # --------------------------------------------------
+    # Android NDK
+    # --------------------------------------------------
 
-      - name: Install Android NDK
-        uses: android-actions/setup-android@v3
+- name: Install Android NDK
+  run: |
+    export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
 
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses || true
+    echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
 
-      - name: Install NDK package
-        run: |
-          sdkmanager "ndk;${ANDROID_NDK_VERSION}"
+    SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" \
+      -name sdkmanager -type f | head -n 1)
 
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" >> "$GITHUB_ENV"
+    if [ -z "$SDKMANAGER" ]; then
+      echo "ERROR: sdkmanager not found"
+      exit 1
+    fi
 
-      # --------------------------------------------------
-      # Configure cross-compilation environment
-      # --------------------------------------------------
+    yes | "$SDKMANAGER" --licenses || true
 
-      - name: Configure Android toolchain
-        run: |
-          export TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+    "$SDKMANAGER" "ndk;${ANDROID_NDK_VERSION}"
 
-          echo "TOOLCHAIN=$TOOLCHAIN" >> "$GITHUB_ENV"
+    echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" >> "$GITHUB_ENV"
+    # --------------------------------------------------
+    # Configure cross-compilation environment
+    # --------------------------------------------------
 
-          echo "CC=$TOOLCHAIN/${TARGET}${ANDROID_API}-clang" >> "$GITHUB_ENV"
-          echo "CXX=$TOOLCHAIN/${TARGET}${ANDROID_API}-clang++" >> "$GITHUB_ENV"
-          echo "AR=$TOOLCHAIN/llvm-ar" >> "$GITHUB_ENV"
-          echo "RANLIB=$TOOLCHAIN/llvm-ranlib" >> "$GITHUB_ENV"
-          echo "STRIP=$TOOLCHAIN/llvm-strip" >> "$GITHUB_ENV"
+    - name: Configure Android toolchain
+      run: |
+        export TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
 
-          echo "CFLAGS=-O2 -fPIC" >> "$GITHUB_ENV"
-          echo "CXXFLAGS=-O2 -fPIC" >> "$GITHUB_ENV"
+        echo "TOOLCHAIN=$TOOLCHAIN" >> "$GITHUB_ENV"
 
-          mkdir -p "$PREFIX"
+        echo "CC=$TOOLCHAIN/${TARGET}${ANDROID_API}-clang" >> "$GITHUB_ENV"
+        echo "CXX=$TOOLCHAIN/${TARGET}${ANDROID_API}-clang++" >> "$GITHUB_ENV"
+        echo "AR=$TOOLCHAIN/llvm-ar" >> "$GITHUB_ENV"
+        echo "RANLIB=$TOOLCHAIN/llvm-ranlib" >> "$GITHUB_ENV"
+        echo "STRIP=$TOOLCHAIN/llvm-strip" >> "$GITHUB_ENV"
 
-          "$TOOLCHAIN/${TARGET}${ANDROID_API}-clang" --version
+        echo "CFLAGS=-O2 -fPIC" >> "$GITHUB_ENV"
+        echo "CXXFLAGS=-O2 -fPIC" >> "$GITHUB_ENV"
 
-      # --------------------------------------------------
-      # Cross pkg-config wrapper
-      # --------------------------------------------------
+        mkdir -p "$PREFIX"
 
-      - name: Configure cross pkg-config
-        run: |
-          mkdir -p "$PREFIX/bin"
+        "$TOOLCHAIN/${TARGET}${ANDROID_API}-clang" --version
 
-          cat > "$PREFIX/bin/aarch64-pkg-config" <<'EOF'
-          #!/bin/sh
-          export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig"
-          unset PKG_CONFIG_PATH
-          exec /usr/bin/pkg-config "$@"
-          EOF
+    # --------------------------------------------------
+    # Cross pkg-config wrapper
+    # --------------------------------------------------
 
-          chmod +x "$PREFIX/bin/aarch64-pkg-config"
+    - name: Configure cross pkg-config
+      run: |
+        mkdir -p "$PREFIX/bin"
 
-          echo "PKG_CONFIG=$PREFIX/bin/aarch64-pkg-config" >> "$GITHUB_ENV"
+        cat > "$PREFIX/bin/aarch64-pkg-config" <<'EOF'
+        #!/bin/sh
+        export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig"
+        unset PKG_CONFIG_PATH
+        exec /usr/bin/pkg-config "$@"
+        EOF
 
-      # --------------------------------------------------
-      # Build libffi
-      # --------------------------------------------------
+        chmod +x "$PREFIX/bin/aarch64-pkg-config"
 
-      - name: Build libffi
-        run: |
-          curl -fL \
-            https://ftp.gnu.org/gnu/libffi/libffi-3.4.8.tar.gz \
-            -o libffi.tar.gz
+        echo "PKG_CONFIG=$PREFIX/bin/aarch64-pkg-config" >> "$GITHUB_ENV"
 
-          tar -xzf libffi.tar.gz
-          cd libffi-3.4.8
+    # --------------------------------------------------
+    # Build libffi
+    # --------------------------------------------------
 
+    - name: Build libffi
+      run: |
+        curl -fL \
+          https://ftp.gnu.org/gnu/libffi/libffi-3.4.8.tar.gz \
+          -o libffi.tar.gz
+
+        tar -xzf libffi.tar.gz
+        cd libffi-3.4.8
+
+        CC="$CC" \
+        AR="$AR" \
+        RANLIB="$RANLIB" \
+        CFLAGS="$CFLAGS" \
+        ./configure \
+          --host="$TARGET" \
+          --build="$BUILD_TRIPLET" \
+          --prefix="$PREFIX" \
+          --disable-shared \
+          --enable-static \
+          --with-pic
+
+        make -j"$(nproc)"
+        make install
+
+    # --------------------------------------------------
+    # Build PCRE2
+    # --------------------------------------------------
+
+    - name: Build PCRE2
+      run: |
+        curl -fL \
+          https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.gz \
+          -o pcre2.tar.gz
+
+        tar -xzf pcre2.tar.gz
+        cd pcre2-10.45
+
+        CC="$CC" \
+        AR="$AR" \
+        RANLIB="$RANLIB" \
+        CFLAGS="$CFLAGS" \
+        ./configure \
+          --host="$TARGET" \
+          --build="$BUILD_TRIPLET" \
+          --prefix="$PREFIX" \
+          --disable-shared \
+          --enable-static \
+          --disable-pcre2-16 \
+          --disable-pcre2-32 \
+          --disable-jit
+
+        make -j"$(nproc)"
+        make install
+
+    # --------------------------------------------------
+    # Build ncurses
+    # --------------------------------------------------
+
+    - name: Build ncurses
+      run: |
+        curl -fL \
+          https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz \
+          -o ncurses.tar.gz
+
+        tar -xzf ncurses.tar.gz
+        cd ncurses-6.5
+
+        CC="$CC" \
+        AR="$AR" \
+        RANLIB="$RANLIB" \
+        CFLAGS="$CFLAGS" \
+        ./configure \
+          --host="$TARGET" \
+          --build="$BUILD_TRIPLET" \
+          --prefix="$PREFIX" \
+          --with-shared=no \
+          --with-normal \
+          --without-debug \
+          --without-ada \
+          --without-cxx \
+          --without-cxx-binding \
+          --without-progs \
+          --without-manpages \
+          --enable-widec \
+          --enable-pc-files \
+          --with-pkg-config-libdir="$PREFIX/lib/pkgconfig" \
+          --with-fallbacks=xterm-256color,xterm
+
+        make -j"$(nproc)"
+        make install
+
+    # --------------------------------------------------
+    # Build GLib using Meson
+    # --------------------------------------------------
+
+    - name: Prepare GLib cross file
+      run: |
+        cat > android-aarch64.ini <<EOF
+        [binaries]
+        c = '$CC'
+        cpp = '$CXX'
+        ar = '$AR'
+        strip = '$STRIP'
+        pkgconfig = '$PKG_CONFIG'
+
+        [host_machine]
+        system = 'android'
+        cpu_family = 'aarch64'
+        cpu = 'aarch64'
+        endian = 'little'
+
+        [properties]
+        needs_exe_wrapper = true
+        pkg_config_libdir = [
+          '$PREFIX/lib/pkgconfig',
+          '$PREFIX/share/pkgconfig'
+        ]
+        EOF
+
+    - name: Build GLib
+      run: |
+        curl -fL \
+          https://download.gnome.org/sources/glib/2.84/glib-2.84.4.tar.xz \
+          -o glib.tar.xz
+
+        tar -xJf glib.tar.xz
+
+        meson setup glib-build glib-2.84.4 \
+          --cross-file android-aarch64.ini \
+          --prefix="$PREFIX" \
+          --libdir=lib \
+          --buildtype=release \
+          -Ddefault_library=static \
+          -Dtests=false \
+          -Dinstalled_tests=false \
+          -Dintrospection=disabled \
+          -Dman-pages=disabled \
+          -Dgtk_doc=false \
+          -Dlibffi=enabled \
+          -Dlibmount=disabled \
+          -Dselinux=disabled \
+          -Dxattr=false
+
+        meson compile -C glib-build -j"$(nproc)"
+        meson install -C glib-build
+
+    # --------------------------------------------------
+    # Verify dependency installation
+    # --------------------------------------------------
+
+    - name: Verify Android dependencies
+      run: |
+        echo "Installed static libraries:"
+        find "$PREFIX/lib" -maxdepth 1 -name '*.a' -print
+
+        echo "GLib:"
+        PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig" \
+          pkg-config --modversion glib-2.0
+
+        echo "ncurses:"
+        find "$PREFIX/lib" -name '*ncurses*.a' -print
+
+        echo "PCRE2:"
+        find "$PREFIX/lib" -name '*pcre2*.a' -print
+
+        echo "libffi:"
+        find "$PREFIX/lib" -name 'libffi*.a' -print
+
+    # --------------------------------------------------
+    # Bootstrap Midnight Commander
+    # --------------------------------------------------
+
+    - name: Bootstrap Midnight Commander
+      run: |
+        ./autogen.sh
+
+    # --------------------------------------------------
+    # Build Midnight Commander
+    # --------------------------------------------------
+
+    - name: Build Midnight Commander
+      run: |
+        mkdir -p build-android
+        cd build-android
+
+        export CPPFLAGS="-I$PREFIX/include"
+        export LDFLAGS="-L$PREFIX/lib"
+
+        ../configure \
+          --host="$TARGET" \
+          --build="$BUILD_TRIPLET" \
           CC="$CC" \
           AR="$AR" \
           RANLIB="$RANLIB" \
-          CFLAGS="$CFLAGS" \
-          ./configure \
-            --host="$TARGET" \
-            --build="$BUILD_TRIPLET" \
-            --prefix="$PREFIX" \
-            --disable-shared \
-            --enable-static \
-            --with-pic
+          STRIP="$STRIP" \
+          PKG_CONFIG="$PKG_CONFIG" \
+          --prefix=/data/local/tmp/mc \
+          --with-screen=ncurses \
+          --with-ncurses-includes="$PREFIX/include" \
+          --with-ncurses-libs="$PREFIX/lib" \
+          --with-glib-static \
+          --disable-nls \
+          --disable-aspell \
+          --without-gpm-mouse \
+          --without-x \
+          --without-subshell \
+          --disable-shared \
+          --enable-static \
+          --disable-werror
 
-          make -j"$(nproc)"
-          make install
+        make -j"$(nproc)"
 
-      # --------------------------------------------------
-      # Build PCRE2
-      # --------------------------------------------------
+        mkdir -p "$GITHUB_WORKSPACE/stage"
 
-      - name: Build PCRE2
-        run: |
-          curl -fL \
-            https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.gz \
-            -o pcre2.tar.gz
+        make DESTDIR="$GITHUB_WORKSPACE/stage" install
 
-          tar -xzf pcre2.tar.gz
-          cd pcre2-10.45
+        "$STRIP" --strip-unneeded \
+          "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
 
-          CC="$CC" \
-          AR="$AR" \
-          RANLIB="$RANLIB" \
-          CFLAGS="$CFLAGS" \
-          ./configure \
-            --host="$TARGET" \
-            --build="$BUILD_TRIPLET" \
-            --prefix="$PREFIX" \
-            --disable-shared \
-            --enable-static \
-            --disable-pcre2-16 \
-            --disable-pcre2-32 \
-            --disable-jit
+    # --------------------------------------------------
+    # Verify binary
+    # --------------------------------------------------
 
-          make -j"$(nproc)"
-          make install
+    - name: Verify Android binary
+      run: |
+        MC="$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
 
-      # --------------------------------------------------
-      # Build ncurses
-      # --------------------------------------------------
+        file "$MC"
 
-      - name: Build ncurses
-        run: |
-          curl -fL \
-            https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz \
-            -o ncurses.tar.gz
+        "$TOOLCHAIN/llvm-readelf" -h "$MC"
 
-          tar -xzf ncurses.tar.gz
-          cd ncurses-6.5
+        echo "Dynamic dependencies:"
+        "$TOOLCHAIN/llvm-readelf" -d "$MC" || true
 
-          CC="$CC" \
-          AR="$AR" \
-          RANLIB="$RANLIB" \
-          CFLAGS="$CFLAGS" \
-          ./configure \
-            --host="$TARGET" \
-            --build="$BUILD_TRIPLET" \
-            --prefix="$PREFIX" \
-            --with-shared=no \
-            --with-normal \
-            --without-debug \
-            --without-ada \
-            --without-cxx \
-            --without-cxx-binding \
-            --without-progs \
-            --without-manpages \
-            --enable-widec \
-            --enable-pc-files \
-            --with-pkg-config-libdir="$PREFIX/lib/pkgconfig" \
-            --with-fallbacks=xterm-256color,xterm
+        if "$TOOLCHAIN/llvm-readelf" -d "$MC" 2>/dev/null \
+          | grep -E 'lib(glib|ncurses|pcre2|ffi)' ; then
+          echo "ERROR: A third-party library is dynamically linked!"
+          exit 1
+        fi
 
-          make -j"$(nproc)"
-          make install
+        echo "Android ARM64 binary verification completed."
 
-      # --------------------------------------------------
-      # Build GLib using Meson
-      # --------------------------------------------------
+    # --------------------------------------------------
+    # Package artifact
+    # --------------------------------------------------
 
-      - name: Prepare GLib cross file
-        run: |
-          cat > android-aarch64.ini <<EOF
-          [binaries]
-          c = '$CC'
-          cpp = '$CXX'
-          ar = '$AR'
-          strip = '$STRIP'
-          pkgconfig = '$PKG_CONFIG'
+    - name: Pack artifacts
+      run: |
+        tar -czf mc-android-arm64.tar.gz \
+          -C stage/data/local/tmp/mc .
 
-          [host_machine]
-          system = 'android'
-          cpu_family = 'aarch64'
-          cpu = 'aarch64'
-          endian = 'little'
-
-          [properties]
-          needs_exe_wrapper = true
-          pkg_config_libdir = [
-            '$PREFIX/lib/pkgconfig',
-            '$PREFIX/share/pkgconfig'
-          ]
-          EOF
-
-      - name: Build GLib
-        run: |
-          curl -fL \
-            https://download.gnome.org/sources/glib/2.84/glib-2.84.4.tar.xz \
-            -o glib.tar.xz
-
-          tar -xJf glib.tar.xz
-
-          meson setup glib-build glib-2.84.4 \
-            --cross-file android-aarch64.ini \
-            --prefix="$PREFIX" \
-            --libdir=lib \
-            --buildtype=release \
-            -Ddefault_library=static \
-            -Dtests=false \
-            -Dinstalled_tests=false \
-            -Dintrospection=disabled \
-            -Dman-pages=disabled \
-            -Dgtk_doc=false \
-            -Dlibffi=enabled \
-            -Dlibmount=disabled \
-            -Dselinux=disabled \
-            -Dxattr=false
-
-          meson compile -C glib-build -j"$(nproc)"
-          meson install -C glib-build
-
-      # --------------------------------------------------
-      # Verify dependency installation
-      # --------------------------------------------------
-
-      - name: Verify Android dependencies
-        run: |
-          echo "Installed static libraries:"
-          find "$PREFIX/lib" -maxdepth 1 -name '*.a' -print
-
-          echo "GLib:"
-          PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig" \
-            pkg-config --modversion glib-2.0
-
-          echo "ncurses:"
-          find "$PREFIX/lib" -name '*ncurses*.a' -print
-
-          echo "PCRE2:"
-          find "$PREFIX/lib" -name '*pcre2*.a' -print
-
-          echo "libffi:"
-          find "$PREFIX/lib" -name 'libffi*.a' -print
-
-      # --------------------------------------------------
-      # Bootstrap Midnight Commander
-      # --------------------------------------------------
-
-      - name: Bootstrap Midnight Commander
-        run: |
-          ./autogen.sh
-
-      # --------------------------------------------------
-      # Build Midnight Commander
-      # --------------------------------------------------
-
-      - name: Build Midnight Commander
-        run: |
-          mkdir -p build-android
-          cd build-android
-
-          export CPPFLAGS="-I$PREFIX/include"
-          export LDFLAGS="-L$PREFIX/lib"
-
-          ../configure \
-            --host="$TARGET" \
-            --build="$BUILD_TRIPLET" \
-            CC="$CC" \
-            AR="$AR" \
-            RANLIB="$RANLIB" \
-            STRIP="$STRIP" \
-            PKG_CONFIG="$PKG_CONFIG" \
-            --prefix=/data/local/tmp/mc \
-            --with-screen=ncurses \
-            --with-ncurses-includes="$PREFIX/include" \
-            --with-ncurses-libs="$PREFIX/lib" \
-            --with-glib-static \
-            --disable-nls \
-            --disable-aspell \
-            --without-gpm-mouse \
-            --without-x \
-            --without-subshell \
-            --disable-shared \
-            --enable-static \
-            --disable-werror
-
-          make -j"$(nproc)"
-
-          mkdir -p "$GITHUB_WORKSPACE/stage"
-
-          make DESTDIR="$GITHUB_WORKSPACE/stage" install
-
-          "$STRIP" --strip-unneeded \
-            "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
-
-      # --------------------------------------------------
-      # Verify binary
-      # --------------------------------------------------
-
-      - name: Verify Android binary
-        run: |
-          MC="$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
-
-          file "$MC"
-
-          "$TOOLCHAIN/llvm-readelf" -h "$MC"
-
-          echo "Dynamic dependencies:"
-          "$TOOLCHAIN/llvm-readelf" -d "$MC" || true
-
-          if "$TOOLCHAIN/llvm-readelf" -d "$MC" 2>/dev/null \
-            | grep -E 'lib(glib|ncurses|pcre2|ffi)' ; then
-            echo "ERROR: A third-party library is dynamically linked!"
-            exit 1
-          fi
-
-          echo "Android ARM64 binary verification completed."
-
-      # --------------------------------------------------
-      # Package artifact
-      # --------------------------------------------------
-
-      - name: Pack artifacts
-        run: |
-          tar -czf mc-android-arm64.tar.gz \
-            -C stage/data/local/tmp/mc .
-
-      - name: Archive artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mc-android-arm64
-          path: mc-android-arm64.tar.gz
-          if-no-files-found: error
+    - name: Archive artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mc-android-arm64
+        path: mc-android-arm64.tar.gz
+        if-no-files-found: error
