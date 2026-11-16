@@ -184,6 +184,11 @@ jobs:
 
             make -j"$(nproc)"
             make install
+
+            echo "Checking libiconv installation:"
+            ls -l "$PREFIX/include/iconv.h"
+            ls -l "$PREFIX/lib/libiconv.a"
+
       # --------------------------------------------------
       # Build ncurses
       # --------------------------------------------------
@@ -222,31 +227,31 @@ jobs:
       # Build GLib using Meson
       # --------------------------------------------------
 
-      - name: Prepare GLib cross file
+      - name: Prepare Android cross file
         run: |
           cat > android-aarch64.ini <<EOF
-            [binaries]
-            c = '$CC'
-            cpp = '$CXX'
-            ar = '$AR'
-            strip = '$STRIP'
-            pkg-config = '$PKG_CONFIG'
+[binaries]
+c = '$CC'
+cpp = '$CXX'
+ar = '$AR'
+strip = '$STRIP'
+pkg-config = '$PKG_CONFIG'
 
-            [built-in options]
-            c_args = ['-I$PREFIX/include']
-            cpp_args = ['-I$PREFIX/include']
-            c_link_args = ['-L$PREFIX/lib']
-            cpp_link_args = ['-L$PREFIX/lib']
+[built-in options]
+c_args = ['-I$PREFIX/include']
+cpp_args = ['-I$PREFIX/include']
+c_link_args = ['-L$PREFIX/lib']
+cpp_link_args = ['-L$PREFIX/lib']
 
-            [host_machine]
-            system = 'android'
-            cpu_family = 'aarch64'
-            cpu = 'aarch64'
-            endian = 'little'
+[host_machine]
+system = 'android'
+cpu_family = 'aarch64'
+cpu = 'aarch64'
+endian = 'little'
 
-            [properties]
-            needs_exe_wrapper = true
-            EOF
+[properties]
+needs_exe_wrapper = true
+EOF
 
           rm -rf glib-build
 
@@ -257,16 +262,6 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
           meson --version
-
-      - name: Check Android iconv
-        run: |
-          echo '#include <iconv.h>' > iconv-test.c
-          echo 'int main(void) { iconv_t cd = iconv_open("UTF-8", "UTF-8"); return cd == (iconv_t)-1; }' >> iconv-test.c
-
-          "$CC" $CFLAGS iconv-test.c -o iconv-test
-
-          echo "Checking iconv symbols:"
-          "$TOOLCHAIN/llvm-nm" -D "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24/libc.so" | grep iconv
 
       - name: Build GLib
         run: |
