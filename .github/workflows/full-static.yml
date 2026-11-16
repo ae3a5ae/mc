@@ -3,6 +3,7 @@ name: full-static
 on:
   workflow_dispatch:
 
+
 jobs:
   build-full-static:
     runs-on: ubuntu-latest
