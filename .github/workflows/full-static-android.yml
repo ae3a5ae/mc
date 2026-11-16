@@ -225,26 +225,6 @@ jobs:
       - name: Prepare GLib cross file
         run: |
           cat > android-aarch64.ini <<EOF
-          [binaries]
-          c = '$CC'
-          cpp = '$CXX'
-          ar = '$AR'
-          strip = '$STRIP'
-          pkg-config = '$PKG_CONFIG'
-
-          [host_machine]
-          system = 'android'
-          cpu_family = 'aarch64'
-          cpu = 'aarch64'
-          endian = 'little'
-
-          [properties]
-          needs_exe_wrapper = true
-          EOF
-
-      - name: Prepare GLib cross file
-        run: |
-          cat > android-aarch64.ini <<EOF
             [binaries]
             c = '$CC'
             cpp = '$CXX'
