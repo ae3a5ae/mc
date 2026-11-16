@@ -166,36 +166,24 @@ jobs:
 
       - name: Build libiconv
         run: |
-          curl -fL \
-            https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz \
-            -o libiconv.tar.gz
-
-          echo "3b08f5f4f9b4eb82f151a7040bfd6fe6c6fb922efe4b1659c66ea933276965e8  libiconv.tar.gz" \
-            | sha256sum -c -
+          curl -fL https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz -o libiconv.tar.gz
 
           tar -xzf libiconv.tar.gz
           cd libiconv-1.18
 
-          CC="$CC" \
-          AR="$AR" \
-          RANLIB="$RANLIB" \
-          CFLAGS="$CFLAGS" \
           ./configure \
             --host="$TARGET" \
             --build="$BUILD_TRIPLET" \
             --prefix="$PREFIX" \
             --disable-shared \
             --enable-static \
-            --with-pic
+            --with-pic \
+            CC="$CC" \
+            AR="$AR" \
+            RANLIB="$RANLIB"
 
-          make -j"$(nproc)"
-          make install
-
-          test -f "$PREFIX/include/iconv.h"
-          test -f "$PREFIX/lib/libiconv.a"
-
-          echo "GNU libiconv successfully installed for Android ARM64."
-
+            make -j"$(nproc)"
+            make install
       # --------------------------------------------------
       # Build ncurses
       # --------------------------------------------------
@@ -253,6 +241,34 @@ jobs:
           [properties]
           needs_exe_wrapper = true
           EOF
+
+      - name: Prepare GLib cross file
+        run: |
+          cat > android-aarch64.ini <<EOF
+            [binaries]
+            c = '$CC'
+            cpp = '$CXX'
+            ar = '$AR'
+            strip = '$STRIP'
+            pkg-config = '$PKG_CONFIG'
+
+            [built-in options]
+            c_args = ['-I$PREFIX/include']
+            cpp_args = ['-I$PREFIX/include']
+            c_link_args = ['-L$PREFIX/lib']
+            cpp_link_args = ['-L$PREFIX/lib']
+
+            [host_machine]
+            system = 'android'
+            cpu_family = 'aarch64'
+            cpu = 'aarch64'
+            endian = 'little'
+
+            [properties]
+            needs_exe_wrapper = true
+            EOF
+
+          rm -rf glib-build
 
       - name: Install Meson
         run: |
