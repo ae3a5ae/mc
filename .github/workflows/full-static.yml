@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-ubuntu:
+  build-full-static:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -94,14 +94,19 @@ jobs:
           name: test-suite-logs-ubuntu
           path: build-*/**/test-suite.log
 
-      - name: Find generated file
-        run: |
-          echo "Build outputs:"
-          find main/build/outputs -maxdepth 5 -type f 2>/dev/null
+      # - name: Find generated file
+      #   run: |
+      #     echo "Build outputs:"
+      #     find main/build/outputs -maxdepth 5 -type f
 
-      # - name: Archive artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: release
-      #     path: main/build/outputs/apk/**/*.apk
-      #     if-no-files-found: error
+
+      - name: Pack artifacts
+        run: |
+          tar -cj --file=/home/runner/work/mc-static.bzip2 /home/runner/work/mc
+
+      - name: Archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: /home/runner/work/mc-static.bzip2
+          if-no-files-found: error
