@@ -27,8 +27,8 @@ jobs:
 
       - name: Install host build tools
         run: |
-        sudo apt-get update
-        sudo apt-get install -y \
+          sudo apt-get update
+          sudo apt-get install -y \
             build-essential \
             autoconf \
             automake \
@@ -143,7 +143,7 @@ jobs:
 
       - name: Build PCRE2
         run: |
-        curl -fL \
+          curl -fL \
             https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.45/pcre2-10.45.tar.gz \
             -o pcre2.tar.gz
 
@@ -173,7 +173,7 @@ jobs:
 
       - name: Build ncurses
         run: |
-        curl -fL \
+          curl -fL \
             https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz \
             -o ncurses.tar.gz
 
