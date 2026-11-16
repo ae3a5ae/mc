@@ -36,7 +36,7 @@ jobs:
             gettext \
             libtool \
             pkg-config \
-            meson \
+            python3-pip \
             ninja-build \
             python3 \
             curl \
@@ -221,6 +221,14 @@ jobs:
           [properties]
           needs_exe_wrapper = true
           EOF
+
+      - name: Install Meson
+        run: |
+          python3 -m pip install --user "meson==1.4.2"
+
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+          meson --version
 
       - name: Build GLib
         run: |
