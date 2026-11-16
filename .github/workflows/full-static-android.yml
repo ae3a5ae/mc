@@ -115,10 +115,7 @@ jobs:
 
       - name: Build libffi
         run: |
-          curl -fL \
-            https://ftp.gnu.org/gnu/libffi/libffi-3.4.8.tar.gz \
-            -o libffi.tar.gz
-
+          curl -fL https://github.com/libffi/libffi/releases/download/v3.4.8/libffi-3.4.8.tar.gz -o libffi.tar.gz
           tar -xzf libffi.tar.gz
           cd libffi-3.4.8
 
