@@ -170,10 +170,7 @@ jobs:
 
       - name: Build ncurses
         run: |
-          curl -fL \
-            https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz \
-            -o ncurses.tar.gz
-
+          curl -fL https://ftp.gnu.org/gnu/ncurses/ncurses-6.5.tar.gz -o ncurses.tar.gz
           tar -xzf ncurses.tar.gz
           cd ncurses-6.5
 
@@ -231,9 +228,7 @@ jobs:
 
       - name: Build GLib
         run: |
-          curl -fL \
-            https://download.gnome.org/sources/glib/2.84/glib-2.84.4.tar.xz \
-            -o glib.tar.xz
+          curl -fL https://download.gnome.org/sources/glib/2.84/glib-2.84.4.tar.xz -o glib.tar.xz
 
           tar -xJf glib.tar.xz
 
