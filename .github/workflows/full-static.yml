@@ -1,4 +1,4 @@
-name: ci-ubuntu
+name: full-static
 
 on:
   workflow_dispatch:
