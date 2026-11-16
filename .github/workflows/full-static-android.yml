@@ -164,6 +164,38 @@ jobs:
           make -j"$(nproc)"
           make install
 
+      - name: Build libiconv
+        run: |
+          curl -fL \
+            https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz \
+            -o libiconv.tar.gz
+
+          echo "3b08f5f4f9b4eb82f151a7040bfd6fe6c6fb922efe4b1659c66ea933276965e8  libiconv.tar.gz" \
+            | sha256sum -c -
+
+          tar -xzf libiconv.tar.gz
+          cd libiconv-1.18
+
+          CC="$CC" \
+          AR="$AR" \
+          RANLIB="$RANLIB" \
+          CFLAGS="$CFLAGS" \
+          ./configure \
+            --host="$TARGET" \
+            --build="$BUILD_TRIPLET" \
+            --prefix="$PREFIX" \
+            --disable-shared \
+            --enable-static \
+            --with-pic
+
+          make -j"$(nproc)"
+          make install
+
+          test -f "$PREFIX/include/iconv.h"
+          test -f "$PREFIX/lib/libiconv.a"
+
+          echo "GNU libiconv successfully installed for Android ARM64."
+
       # --------------------------------------------------
       # Build ncurses
       # --------------------------------------------------
@@ -230,6 +262,16 @@ jobs:
 
           meson --version
 
+      - name: Check Android iconv
+        run: |
+          echo '#include <iconv.h>' > iconv-test.c
+          echo 'int main(void) { iconv_t cd = iconv_open("UTF-8", "UTF-8"); return cd == (iconv_t)-1; }' >> iconv-test.c
+
+          "$CC" $CFLAGS iconv-test.c -o iconv-test
+
+          echo "Checking iconv symbols:"
+          "$TOOLCHAIN/llvm-nm" -D "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24/libc.so" | grep iconv
+
       - name: Build GLib
         run: |
           curl -fL \
@@ -237,6 +279,10 @@ jobs:
             -o glib.tar.xz
 
           tar -xJf glib.tar.xz
+
+          export CFLAGS="$CFLAGS -I$PREFIX/include"
+          export CXXFLAGS="$CXXFLAGS -I$PREFIX/include"
+          export LDFLAGS="-L$PREFIX/lib"
 
           meson setup glib-build glib-2.84.4 \
             --cross-file android-aarch64.ini \
