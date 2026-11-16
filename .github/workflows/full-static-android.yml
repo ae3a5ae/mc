@@ -230,28 +230,31 @@ jobs:
       - name: Prepare Android cross file
         run: |
           cat > android-aarch64.ini <<EOF
-[binaries]
-c = '$CC'
-cpp = '$CXX'
-ar = '$AR'
-strip = '$STRIP'
-pkg-config = '$PKG_CONFIG'
+          [binaries]
+          c = '$CC'
+          cpp = '$CXX'
+          ar = '$AR'
+          strip = '$STRIP'
+          pkg-config = '$PKG_CONFIG'
 
-[built-in options]
-c_args = ['-I$PREFIX/include']
-cpp_args = ['-I$PREFIX/include']
-c_link_args = ['-L$PREFIX/lib']
-cpp_link_args = ['-L$PREFIX/lib']
+          [built-in options]
+          c_args = ['-I$PREFIX/include']
+          cpp_args = ['-I$PREFIX/include']
+          c_link_args = ['-L$PREFIX/lib']
+          cpp_link_args = ['-L$PREFIX/lib']
 
-[host_machine]
-system = 'android'
-cpu_family = 'aarch64'
-cpu = 'aarch64'
-endian = 'little'
+          [host_machine]
+          system = 'android'
+          cpu_family = 'aarch64'
+          cpu = 'aarch64'
+          endian = 'little'
 
-[properties]
-needs_exe_wrapper = true
-EOF
+          [properties]
+          needs_exe_wrapper = true
+          EOF
+
+          echo "Generated Android cross file:"
+          cat android-aarch64.ini
 
           rm -rf glib-build
 
