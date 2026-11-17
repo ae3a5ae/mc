@@ -167,13 +167,13 @@ gboolean classic_progressbar = TRUE;
 
 typedef enum
 {
-    MSDOS_SUPER_MAGIC = 0x4d44,
-    NTFS_SB_MAGIC = 0x5346544e,
+    MC_MSDOS_SUPER_MAGIC = 0x4d44,
+    MC_NTFS_SB_MAGIC = 0x5346544e,
     FUSE_MAGIC = 0x65735546,
-    PROC_SUPER_MAGIC = 0x9fa0,
-    SMB_SUPER_MAGIC = 0x517B,
-    NCP_SUPER_MAGIC = 0x564c,
-    USBDEVICE_SUPER_MAGIC = 0x9fa2
+    MC_PROC_SUPER_MAGIC = 0x9fa0,
+    MC_SMB_SUPER_MAGIC = 0x517B,
+    MC_NCP_SUPER_MAGIC = 0x564c,
+    MC_USBDEVICE_SUPER_MAGIC = 0x9fa2
 } filegui_nonattrs_fs_t;
 
 // Used for button result values
@@ -287,12 +287,12 @@ filegui__check_attrs_on_fs (const char *fs_path)
     || (!defined(USE_STATVFS) && defined(HAVE_STRUCT_STATFS_F_TYPE))
     switch ((filegui_nonattrs_fs_t) stfs.f_type)
     {
-    case MSDOS_SUPER_MAGIC:
-    case NTFS_SB_MAGIC:
-    case PROC_SUPER_MAGIC:
-    case SMB_SUPER_MAGIC:
-    case NCP_SUPER_MAGIC:
-    case USBDEVICE_SUPER_MAGIC:
+    case MC_MSDOS_SUPER_MAGIC:
+    case MC_NTFS_SB_MAGIC:
+    case MC_PROC_SUPER_MAGIC:
+    case MC_SMB_SUPER_MAGIC:
+    case MC_NCP_SUPER_MAGIC:
+    case MC_USBDEVICE_SUPER_MAGIC:
         return FALSE;
     default:
         break;
