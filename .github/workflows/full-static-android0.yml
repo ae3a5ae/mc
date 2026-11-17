@@ -466,6 +466,17 @@ jobs:
               fi
           done
 
+          # Diagnose nl_langinfo
+          echo "===== strutil.c headers ====="
+          head -80 ../lib/strutil/strutil.c
+
+          echo "===== Android langinfo.h ====="
+          find "$ANDROID_NDK_HOME" -name langinfo.h
+
+          echo "===== CODESET definition ====="
+          grep -n CODESET \
+            "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/langinfo.h" || true
+
           ../configure \
             --host="$TARGET" \
             --build="$BUILD_TRIPLET" \
