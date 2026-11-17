@@ -347,6 +347,42 @@ jobs:
         run: |
           ./autogen.sh
 
+      - name: Diagnose GLib installation
+        run: |
+          echo "===== GLib headers ====="
+          ls -la "$PREFIX/include/glib-2.0/glib.h"
+
+          echo "===== GLib libraries ====="
+          find "$PREFIX/lib" -maxdepth 1 -name '*.a' -print
+
+          echo "===== GLib pkg-config files ====="
+          find "$PREFIX" -name 'glib-2.0.pc' -o -name 'gobject-2.0.pc'
+
+          echo "===== pkg-config GLib ====="
+          "$PKG_CONFIG" --modversion glib-2.0 || true
+          "$PKG_CONFIG" --static --libs glib-2.0 || true
+
+      - name: Diagnose GLib pkg-config
+        run: |
+          echo "===== PKG_CONFIG ====="
+          cat "$PKG_CONFIG"
+
+          echo "===== GLib pkg-config files ====="
+          find "$PREFIX" -name '*.pc' -print
+
+          echo "===== GLib installation ====="
+          ls -l "$PREFIX/include/glib-2.0/glib.h"
+          ls -l "$PREFIX/lib"/libglib-2.0.a
+
+          echo "===== GLib version ====="
+          "$PKG_CONFIG" --modversion glib-2.0
+
+          echo "===== GLib compile flags ====="
+          "$PKG_CONFIG" --cflags glib-2.0
+
+          echo "===== GLib static link flags ====="
+          "$PKG_CONFIG" --static --libs glib-2.0
+
       # --------------------------------------------------
       # Build Midnight Commander
       # --------------------------------------------------
@@ -369,8 +405,6 @@ jobs:
             PKG_CONFIG="$PKG_CONFIG" \
             --prefix=/data/local/tmp/mc \
             --with-screen=ncurses \
-            --with-ncurses-includes="$PREFIX/include" \
-            --with-ncurses-libs="$PREFIX/lib" \
             --with-glib-static \
             --disable-nls \
             --disable-aspell \
