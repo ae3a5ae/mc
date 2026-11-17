@@ -48,7 +48,7 @@ jobs:
       # Android NDK
       # --------------------------------------------------
 
-     - name: Get libiconv
+      - name: Get libiconv
         run: |
           curl -m 10 -fL https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz -o libiconv.tar.gz
 
