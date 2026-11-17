@@ -480,8 +480,6 @@ jobs:
           }
           EOF
 
-          "$CC" $CFLAGS $CPPFLAGS langinfo-test.c -o langinfo-test
-
           echo "===== TEST nl_langinfo WITH FEATURE MACROS ====="
 
           "$CC" $CFLAGS $CPPFLAGS \
