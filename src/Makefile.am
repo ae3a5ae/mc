@@ -56,8 +56,13 @@ libinternal_la_LIBADD = \
 	$(DIFFLIB) $(EDITLIB) $(SUBSHELLLIB)
 
 mc_LDADD = \
-	libinternal.la \
-	$(top_builddir)/lib/libmc.la
+    libinternal.la \
+    $(top_builddir)/lib/libmc.la
+
+if HAVE_GMODULE
+else
+    mc_LDADD += $(GLIB_LIBS)
+endif
 
 SRC_mc_conssaver = \
 	cons.handler.c consaver/cons.saver.h

@@ -63,6 +63,4 @@ libmc_la_LIBADD += $(MCLIBS) $(SLANGLIB)
 
 if HAVE_GMODULE
     libmc_la_LIBADD += $(GMODULE_LIBS)
-else
-    libmc_la_LIBADD += $(GLIB_LIBS)
 endif
