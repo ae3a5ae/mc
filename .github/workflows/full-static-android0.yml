@@ -520,12 +520,12 @@ jobs:
 
           make -j"$(nproc)"
 
-      #    mkdir -p "$GITHUB_WORKSPACE/stage"
+          mkdir -p "$GITHUB_WORKSPACE/stage"
 
-      #    make DESTDIR="$GITHUB_WORKSPACE/stage" install
+          make DESTDIR="$GITHUB_WORKSPACE/stage" install
 
-      #    "$STRIP" --strip-unneeded \
-      #      "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
+          "$STRIP" --strip-unneeded \
+            "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
 
       - name: Inspect GLib and MC archives
         run: |
@@ -553,6 +553,18 @@ jobs:
 
           echo "===== All GLib references ====="
           grep -Rn 'GLIB_LIBS' --include='Makefile.am' .
+
+      - name: Locate Midnight Commander binary
+        run: |
+          echo "===== MC executables ====="
+          find . -type f -name mc -perm -111 -print
+
+          echo "===== Staging directory ====="
+          find stage -maxdepth 7 -type f 2>/dev/null | head -100
+
+          echo "===== Build directory ====="
+          find build-android -type f -name mc -print
+
 
       # --------------------------------------------------
       # Verify binary
