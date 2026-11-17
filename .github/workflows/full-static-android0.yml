@@ -518,7 +518,7 @@ jobs:
             --enable-static \
             --disable-werror
 
-          make -j"$(nproc)" || true
+          make -j"$(nproc)"
 
       #    mkdir -p "$GITHUB_WORKSPACE/stage"
 
