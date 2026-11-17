@@ -421,6 +421,20 @@ jobs:
               build-android/config.log | tail -250
           fi
 
+      - name: Diagnose MC GLib detection
+        run: |
+          echo "===== GLIB CONFIGURE CHECKS ====="
+
+          grep -n -i -C 12 \
+            "Cannot find static glib\|with-glib-static\|GLIB_LIBS" \
+            configure
+
+          echo "===== CONFIGURE TESTS ====="
+
+          grep -n -i -C 5 \
+            "glib.*static\|static.*glib" \
+            config.log
+
       # --------------------------------------------------
       # Build Midnight Commander
       # --------------------------------------------------
