@@ -305,6 +305,7 @@ filename_completion_function (const char *text, int state, input_complete_t flag
 static char *
 username_completion_function (const char *text, int state, input_complete_t flags)
 {
+#ifndef __ANDROID__
     static struct passwd *entry = NULL;
     static size_t userlen = 0;
 
@@ -313,18 +314,20 @@ username_completion_function (const char *text, int state, input_complete_t flag
 
     if (text[0] == '\\' && text[1] == '~')
         text++;
+
     if (state == 0)
-    {  // Initialization stuff
+    {
         setpwent ();
         userlen = strlen (text + 1);
     }
 
     while ((entry = getpwent ()) != NULL)
     {
-        // Null usernames should result in all users as possible completions.
         if (userlen == 0)
             break;
-        if (text[1] == entry->pw_name[0] && strncmp (text + 1, entry->pw_name, userlen) == 0)
+
+        if (text[1] == entry->pw_name[0] &&
+            strncmp (text + 1, entry->pw_name, userlen) == 0)
             break;
     }
 
@@ -332,6 +335,12 @@ username_completion_function (const char *text, int state, input_complete_t flag
         return g_strconcat ("~", entry->pw_name, PATH_SEP_STR, (char *) NULL);
 
     endpwent ();
+#else
+    (void) text;
+    (void) state;
+    (void) flags;
+#endif
+
     return NULL;
 }
 
