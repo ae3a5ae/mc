@@ -546,6 +546,14 @@ jobs:
           echo "===== lib/Makefile.am ====="
           grep -n -A15 -B5 'libmc_la_LIBADD' lib/Makefile.am
 
+      - name: Inspect executable link dependencies
+        run: |
+          echo "===== Top-level Makefile.am ====="
+          grep -n -A12 -B5 -E 'mc_LDADD|mc_LDFLAGS|bin_PROGRAMS|noinst_PROGRAMS' Makefile.am || true
+
+          echo "===== All GLib references ====="
+          grep -Rn 'GLIB_LIBS' --include='Makefile.am' .
+
       # --------------------------------------------------
       # Verify binary
       # --------------------------------------------------
