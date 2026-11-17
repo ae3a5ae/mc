@@ -466,6 +466,22 @@ jobs:
               fi
           done
 
+          echo "===== TEST nl_langinfo ====="
+
+          cat > langinfo-test.c <<'EOF'
+          #include <langinfo.h>
+          #include <stdio.h>
+
+          int main(void)
+          {
+              const char *encoding = nl_langinfo(CODESET);
+              printf("Encoding: %s\n", encoding);
+              return 0;
+          }
+          EOF
+
+          "$CC" $CFLAGS $CPPFLAGS langinfo-test.c -o langinfo-test
+
           echo "===== TEST nl_langinfo WITH FEATURE MACROS ====="
 
           "$CC" $CFLAGS $CPPFLAGS \
