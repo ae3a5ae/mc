@@ -480,11 +480,19 @@ jobs:
           }
           EOF
 
-          echo "===== TEST nl_langinfo WITH FEATURE MACROS ====="
+          echo "===== ANDROID LANGINFO HEADER ====="
 
-          "$CC" $CFLAGS $CPPFLAGS \
-            -D_POSIX_C_SOURCE=200809L \
-            langinfo-test.c -o langinfo-test
+          sed -n '1,180p' \
+            "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/langinfo.h"
+
+          echo "===== NDK nl_langinfo DECLARATION ====="
+
+          grep -n -B 12 -A 12 'nl_langinfo' \
+            "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/langinfo.h"
+
+          echo "===== FEATURE MACROS ====="
+
+          "$CC" -dM -E -x c /dev/null | grep -E '_POSIX|_GNU_SOURCE|__ANDROID_API__'
 
           ../configure \
             --host="$TARGET" \
