@@ -435,17 +435,17 @@ jobs:
           export GLIB_LIBDIR="$PREFIX/lib"
 
           echo "===== GLIB_LIBDIR IN configure ====="
-          grep -n -C 5 'GLIB_LIBDIR' configure
+          grep -n -C 5 'GLIB_LIBDIR' ../configure || true
 
           echo "===== GLIB_LIBDIR IN configure.ac ====="
-          grep -n -C 5 'GLIB_LIBDIR' configure.ac
+          grep -n -C 5 'GLIB_LIBDIR' ../configure.ac || true
 
           echo "===== STATIC LIBRARIES ====="
           ls -l "$PREFIX/lib/libglib-2.0.a"
           ls -l "$PREFIX/lib/libgmodule-2.0.a"
 
           echo "===== LIBRARY DIRECTORY VARIABLES ====="
-          grep -R -n 'GLIB_LIBDIR' configure.ac m4 2>/dev/null || true
+          grep -R -n 'GLIB_LIBDIR' ../configure.ac ../m4 2>/dev/null || true
 
           ../configure \
             --host="$TARGET" \
