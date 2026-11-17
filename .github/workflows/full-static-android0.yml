@@ -409,6 +409,7 @@ jobs:
 
           echo "===== Result ====="
           file glib-test
+
       - name: Show MC configure errors
         if: failure()
         run: |
@@ -460,6 +461,17 @@ jobs:
 
           "$STRIP" --strip-unneeded \
             "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
+
+      - name: Diagnose MC GLib detection
+        if: failure()
+        run: |
+          echo "===== GLib detection in configure ====="
+          grep -n -B20 -A35 \
+            "Cannot find static glib" configure || true
+
+          echo "===== GLib tests in config.log ====="
+          grep -in -B15 -A35 \
+            glib build-android/config.log | tail -300
 
       # --------------------------------------------------
       # Verify binary
