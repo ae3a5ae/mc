@@ -434,6 +434,9 @@ jobs:
           export LDFLAGS="-L$PREFIX/lib"
           export GLIB_LIBDIR="$PREFIX/lib"
 
+          export NCURSES_CFLAGS="$("$PKG_CONFIG" --cflags ncursesw)"
+          export NCURSES_LIBS="$("$PKG_CONFIG" --libs ncursesw)"
+
           echo "===== GLib static library checks ====="
           test -f "$GLIB_LIBDIR/libglib-2.0.a"
           test -f "$GLIB_LIBDIR/libgmodule-2.0.a"
@@ -443,6 +446,25 @@ jobs:
 
           grep -n -C 5 'GLIB_LIBDIR' ../configure || true
           grep -n -C 5 'GLIB_LIBDIR' ../configure.ac || true
+
+          echo "===== NCURSES HEADERS ====="
+          find "$PREFIX/include" -type f \
+            \( -name 'curses.h' -o -name 'ncurses.h' -o -name 'term.h' \)
+
+          echo "===== NCURSES PKG-CONFIG ====="
+          "$PKG_CONFIG" --modversion ncursesw
+          "$PKG_CONFIG" --cflags ncursesw
+          "$PKG_CONFIG" --libs ncursesw
+
+          echo "===== HEADER TEST ====="
+          for h in ncursesw/ncurses.h ncursesw/curses.h ncurses.h curses.h; do
+              printf '#include <%s>\nint main(void) { return 0; }\n' "$h" > ncurses-test.c
+              if "$CC" $CFLAGS $CPPFLAGS ncurses-test.c -o ncurses-test; then
+                  echo "FOUND: $h"
+              else
+                  echo "NOT FOUND: $h"
+              fi
+          done
 
           ../configure \
             --host="$TARGET" \
@@ -456,6 +478,8 @@ jobs:
             GLIB_LIBS="$("$PKG_CONFIG" --libs glib-2.0)" \
             --prefix=/data/local/tmp/mc \
             --with-screen=ncurses \
+            --with-ncurses-libdir="$PREFIX/lib" \
+            --with-ncurses-includedir="$PREFIX/include" \
             --with-glib-static \
             --disable-nls \
             --disable-aspell \
