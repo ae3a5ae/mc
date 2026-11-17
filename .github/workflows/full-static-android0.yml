@@ -173,9 +173,6 @@ jobs:
 
       - name: Build libiconv
         run: |
-      #   curl -fL https://ftp.gnu.org/gnu/libiconv/libiconv-1.18.tar.gz -o libiconv.tar.gz
-
-      #   tar -xzf libiconv.tar.gz
           cd libiconv-1.18
 
           ./configure \
