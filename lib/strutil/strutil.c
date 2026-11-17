@@ -34,6 +34,20 @@
 #include "lib/util.h"  // MC_PTR_FREE
 #include "lib/strutil.h"
 
+#ifdef __ANDROID__
+#if __ANDROID_API__ < 26
+static const char *
+mc_android_nl_langinfo (nl_item item)
+{
+    if (item == CODESET)
+        return "UTF-8";
+
+    return "";
+}
+#define nl_langinfo(item) mc_android_nl_langinfo(item)
+#endif
+#endif
+
 /*** global variables ****************************************************************************/
 
 GIConv str_cnv_to_term;
