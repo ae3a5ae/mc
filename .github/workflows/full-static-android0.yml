@@ -466,21 +466,11 @@ jobs:
               fi
           done
 
-          echo "===== TEST nl_langinfo ====="
+          echo "===== TEST nl_langinfo WITH FEATURE MACROS ====="
 
-          cat > langinfo-test.c <<'EOF'
-          #include <langinfo.h>
-          #include <stdio.h>
-
-          int main(void)
-          {
-              const char *encoding = nl_langinfo(CODESET);
-              printf("Encoding: %s\n", encoding);
-              return 0;
-          }
-          EOF
-
-          "$CC" $CFLAGS $CPPFLAGS langinfo-test.c -o langinfo-test
+          "$CC" $CFLAGS $CPPFLAGS \
+            -D_POSIX_C_SOURCE=200809L \
+            langinfo-test.c -o langinfo-test
 
           ../configure \
             --host="$TARGET" \
