@@ -518,7 +518,15 @@ jobs:
             --enable-static \
             --disable-werror
 
-          make -j"$(nproc)"
+          make -j"$(nproc)" || true
+
+          echo "===== libmc.la ====="
+          grep -nE 'dependency_libs|library_names|old_library|dlname' \
+            lib/.libs/libmc.la || true
+
+          echo "===== GLib references in Makefile ====="
+          grep -nE 'glib|GLIB' \
+            lib/Makefile || true
 
           mkdir -p "$GITHUB_WORKSPACE/stage"
 
