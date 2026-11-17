@@ -446,6 +446,15 @@ jobs:
 
           export CPPFLAGS="-I$PREFIX/include"
           export LDFLAGS="-L$PREFIX/lib"
+          export GLIB_LIBDIR="$PREFIX/lib"
+
+          echo "===== GLIB STATIC DETECTION ====="
+          echo "GLIB_LIBDIR=$GLIB_LIBDIR"
+
+          ls -l "$GLIB_LIBDIR"/libglib-2.0.a
+          ls -l "$GLIB_LIBDIR"/libgmodule-2.0.a
+
+          grep -n 'GLIB_LIBDIR=' ../configure
 
           ../configure \
             --host="$TARGET" \
@@ -455,6 +464,8 @@ jobs:
             RANLIB="$RANLIB" \
             STRIP="$STRIP" \
             PKG_CONFIG="$PKG_CONFIG" \
+            GLIB_CFLAGS="$("$PKG_CONFIG" --cflags glib-2.0)" \
+            GLIB_LIBS="$("$PKG_CONFIG" --libs glib-2.0)" \
             --prefix=/data/local/tmp/mc \
             --with-screen=ncurses \
             --with-glib-static \
