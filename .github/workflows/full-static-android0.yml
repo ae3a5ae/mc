@@ -533,13 +533,18 @@ jobs:
           file android-deps/lib/libglib-2.0.a
 
           echo "===== GLib archive members ====="
-          llvm-ar t android-deps/lib/libglib-2.0.a | head -20
+          "$TOOLCHAIN/llvm-ar" t android-deps/lib/libglib-2.0.a | head -20
 
           echo "===== MC archive GLib members ====="
-          llvm-ar t build-android/lib/.libs/libmc.a | grep -i glib || true
+          "$TOOLCHAIN/llvm-ar" t build-android/lib/.libs/libmc.a | grep -i glib || true
 
           echo "===== MC archive first members ====="
-          llvm-ar t build-android/lib/.libs/libmc.a | head -30
+          "$TOOLCHAIN/llvm-ar" t build-android/lib/.libs/libmc.a | head -30
+
+      - name: Inspect libmc Automake configuration
+        run: |
+          echo "===== lib/Makefile.am ====="
+          grep -n -A15 -B5 'libmc_la_LIBADD' lib/Makefile.am
 
       # --------------------------------------------------
       # Verify binary
