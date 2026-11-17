@@ -218,10 +218,13 @@ chown_dlg_create (WPanel *panel)
     // add field for unknown names (numbers)
     listbox_add_item (l_user, LISTBOX_APPEND_AT_END, 0, _ ("<Unknown user>"), NULL, FALSE);
     // get and put user names in the listbox
+
+    #ifndef __ANDROID__
     setpwent ();
     while ((l_pass = getpwent ()) != NULL)
         listbox_add_item (l_user, LISTBOX_APPEND_SORTED, 0, l_pass->pw_name, NULL, FALSE);
     endpwent ();
+    #endif
 
     group_add_widget (g, groupbox_new (2, 4 + GW, GH, GW, _ ("Group name")));
     l_group = listbox_new (3, 5 + GW, GH - 2, GW - 2, FALSE, NULL);
@@ -229,10 +232,13 @@ chown_dlg_create (WPanel *panel)
     // add field for unknown names (numbers)
     listbox_add_item (l_group, LISTBOX_APPEND_AT_END, 0, _ ("<Unknown group>"), NULL, FALSE);
     // get and put group names in the listbox
+
+    #ifndef __ANDROID__
     setgrent ();
     while ((l_grp = getgrent ()) != NULL)
         listbox_add_item (l_group, LISTBOX_APPEND_SORTED, 0, l_grp->gr_name, NULL, FALSE);
     endgrent ();
+    #endif
 
     group_add_widget (g, groupbox_new (2, 5 + GW * 2, GH, GW, _ ("File")));
     // add widgets for the file information

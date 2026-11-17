@@ -49,6 +49,10 @@
 
 #include "cmd.h"  // advanced_chown_cmd()
 
+#ifdef __ANDROID__
+#include <android/api-level.h>
+#endif
+
 /*** global variables ****************************************************************************/
 
 /*** file scope macro definitions ****************************************************************/
@@ -554,21 +558,25 @@ user_group_button_cb (WButton *button, int action)
         if (is_owner)
         {
             // get and put user names in the listbox
+        #ifndef __ANDROID__
             setpwent ();
             while ((chl_pass = getpwent ()) != NULL)
                 listbox_add_item (chl_list, LISTBOX_APPEND_SORTED, 0, chl_pass->pw_name, NULL,
-                                  FALSE);
+                                FALSE);
             endpwent ();
+        #endif
             fe = listbox_search_text (chl_list, get_owner (sf_stat.st_uid));
         }
         else
         {
             // get and put group names in the listbox
+        #ifndef __ANDROID__
             setgrent ();
             while ((chl_grp = getgrent ()) != NULL)
                 listbox_add_item (chl_list, LISTBOX_APPEND_SORTED, 0, chl_grp->gr_name, NULL,
-                                  FALSE);
+                                FALSE);
             endgrent ();
+        #endif
             fe = listbox_search_text (chl_list, get_group (sf_stat.st_gid));
         }
 
