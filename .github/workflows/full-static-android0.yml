@@ -434,13 +434,18 @@ jobs:
           export LDFLAGS="-L$PREFIX/lib"
           export GLIB_LIBDIR="$PREFIX/lib"
 
-          echo "===== GLIB STATIC DETECTION ====="
-          echo "GLIB_LIBDIR=$GLIB_LIBDIR"
+          echo "===== GLIB_LIBDIR IN configure ====="
+          grep -n -C 5 'GLIB_LIBDIR' configure
 
-          ls -l "$GLIB_LIBDIR"/libglib-2.0.a
-          ls -l "$GLIB_LIBDIR"/libgmodule-2.0.a
+          echo "===== GLIB_LIBDIR IN configure.ac ====="
+          grep -n -C 5 'GLIB_LIBDIR' configure.ac
 
-          grep -n 'GLIB_LIBDIR=' ../configure
+          echo "===== STATIC LIBRARIES ====="
+          ls -l "$PREFIX/lib/libglib-2.0.a"
+          ls -l "$PREFIX/lib/libgmodule-2.0.a"
+
+          echo "===== LIBRARY DIRECTORY VARIABLES ====="
+          grep -R -n 'GLIB_LIBDIR' configure.ac m4 2>/dev/null || true
 
           ../configure \
             --host="$TARGET" \
