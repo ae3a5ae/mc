@@ -520,20 +520,26 @@ jobs:
 
           make -j"$(nproc)" || true
 
-          echo "===== libmc.la ====="
-          grep -nE 'dependency_libs|library_names|old_library|dlname' \
-            lib/.libs/libmc.la || true
+      #    mkdir -p "$GITHUB_WORKSPACE/stage"
 
-          echo "===== GLib references in Makefile ====="
-          grep -nE 'glib|GLIB' \
-            lib/Makefile || true
+      #    make DESTDIR="$GITHUB_WORKSPACE/stage" install
 
-          mkdir -p "$GITHUB_WORKSPACE/stage"
+      #    "$STRIP" --strip-unneeded \
+      #      "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
 
-          make DESTDIR="$GITHUB_WORKSPACE/stage" install
+      - name: Inspect GLib and MC archives
+        run: |
+          echo "===== GLib archive type ====="
+          file android-deps/lib/libglib-2.0.a
 
-          "$STRIP" --strip-unneeded \
-            "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
+          echo "===== GLib archive members ====="
+          llvm-ar t android-deps/lib/libglib-2.0.a | head -20
+
+          echo "===== MC archive GLib members ====="
+          llvm-ar t build-android/lib/.libs/libmc.a | grep -i glib || true
+
+          echo "===== MC archive first members ====="
+          llvm-ar t build-android/lib/.libs/libmc.a | head -30
 
       # --------------------------------------------------
       # Verify binary
