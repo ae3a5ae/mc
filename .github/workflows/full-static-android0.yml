@@ -466,16 +466,21 @@ jobs:
               fi
           done
 
-          # Diagnose nl_langinfo
-          echo "===== strutil.c headers ====="
-          head -80 ../lib/strutil/strutil.c
+          echo "===== TEST nl_langinfo ====="
 
-          echo "===== Android langinfo.h ====="
-          find "$ANDROID_NDK_HOME" -name langinfo.h
+          cat > langinfo-test.c <<'EOF'
+          #include <langinfo.h>
+          #include <stdio.h>
 
-          echo "===== CODESET definition ====="
-          grep -n CODESET \
-            "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/langinfo.h" || true
+          int main(void)
+          {
+              const char *encoding = nl_langinfo(CODESET);
+              printf("Encoding: %s\n", encoding);
+              return 0;
+          }
+          EOF
+
+          "$CC" $CFLAGS $CPPFLAGS langinfo-test.c -o langinfo-test
 
           ../configure \
             --host="$TARGET" \
