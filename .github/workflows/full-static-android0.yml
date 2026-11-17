@@ -434,18 +434,15 @@ jobs:
           export LDFLAGS="-L$PREFIX/lib"
           export GLIB_LIBDIR="$PREFIX/lib"
 
-          echo "===== GLIB_LIBDIR IN configure ====="
+          echo "===== GLib static library checks ====="
+          test -f "$GLIB_LIBDIR/libglib-2.0.a"
+          test -f "$GLIB_LIBDIR/libgmodule-2.0.a"
+
+          echo "GLIB_LIBDIR=$GLIB_LIBDIR"
+          echo "===== Configure static GLib logic ====="
+
           grep -n -C 5 'GLIB_LIBDIR' ../configure || true
-
-          echo "===== GLIB_LIBDIR IN configure.ac ====="
           grep -n -C 5 'GLIB_LIBDIR' ../configure.ac || true
-
-          echo "===== STATIC LIBRARIES ====="
-          ls -l "$PREFIX/lib/libglib-2.0.a"
-          ls -l "$PREFIX/lib/libgmodule-2.0.a"
-
-          echo "===== LIBRARY DIRECTORY VARIABLES ====="
-          grep -R -n 'GLIB_LIBDIR' ../configure.ac ../m4 2>/dev/null || true
 
           ../configure \
             --host="$TARGET" \
@@ -477,17 +474,6 @@ jobs:
 
           "$STRIP" --strip-unneeded \
             "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
-
-      - name: Diagnose MC GLib detection
-        if: failure()
-        run: |
-          echo "===== GLib detection in configure ====="
-          grep -n -B20 -A35 \
-            "Cannot find static glib" configure || true
-
-          echo "===== GLib tests in config.log ====="
-          grep -in -B15 -A35 \
-            glib build-android/config.log | tail -300
 
       # --------------------------------------------------
       # Verify binary
