@@ -383,6 +383,43 @@ jobs:
           echo "===== GLib static link flags ====="
           "$PKG_CONFIG" --static --libs glib-2.0
 
+      - name: Test static GLib linking
+        run: |
+          cat > glib-test.c <<'EOF'
+          #include <glib.h>
+
+          int main(void)
+          {
+              gpointer p = g_malloc(16);
+              g_free(p);
+              return 0;
+          }
+          EOF
+
+          echo "===== Compiling and linking GLib test ====="
+
+          "$CC" \
+            $CFLAGS \
+            $CPPFLAGS \
+            $("$PKG_CONFIG" --cflags glib-2.0) \
+            glib-test.c \
+            $LDFLAGS \
+            $("$PKG_CONFIG" --static --libs glib-2.0) \
+            -o glib-test
+
+          echo "===== Result ====="
+          file glib-test
+      - name: Show MC configure errors
+        if: failure()
+        run: |
+          echo "===== GLib-related configure errors ====="
+
+          if [ -f build-android/config.log ]; then
+            grep -in -B15 -A35 \
+              -E 'glib|cannot find|undefined reference|error:' \
+              build-android/config.log | tail -250
+          fi
+
       # --------------------------------------------------
       # Build Midnight Commander
       # --------------------------------------------------
