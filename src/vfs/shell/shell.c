@@ -559,7 +559,7 @@ shell_open_archive_pipeopen (struct vfs_s_super *super)
     }
 
     argv[i++] = super->path_element->host;
-    argv[i++] = "echo SHELL:; /bin/sh";
+    argv[i++] = "echo SHELL:; /system/bin/sh";
     argv[i++] = NULL;
 
     shell_pipeopen (super, xsh, argv);

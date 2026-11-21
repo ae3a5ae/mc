@@ -473,7 +473,7 @@ exec_extension (WPanel *panel, void *target, const vfs_path_t *filename_vpath, c
     }
 
     cmd_file = fdopen (cmd_file_fd, "w");
-    fputs ("#! /bin/sh\n\n", cmd_file);
+    fputs ("#! /system/bin/sh\n\n", cmd_file);
 
     export_variables = exec_get_export_variables (filename_vpath);
     if (export_variables != NULL)
@@ -505,7 +505,7 @@ exec_extension (WPanel *panel, void *target, const vfs_path_t *filename_vpath, c
         // Set executable flag on the command file ...
         mc_chmod (script_vpath, S_IRWXU);
         // ... but don't rely on it - run /bin/sh explicitly
-        cmd = g_strconcat ("/bin/sh ", vfs_path_as_str (script_vpath), (char *) NULL);
+        cmd = g_strconcat ("/system/bin/sh ", vfs_path_as_str (script_vpath), (char *) NULL);
     }
 
     if (run_view)
