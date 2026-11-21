@@ -98,8 +98,12 @@ mc_shell_get_installed_in_system (void)
      *     mc_global.tty.shell = g_strdup ("/bin/fish");
      */
     else
-        // Fallback and last resort: system default shell
-        mc_shell->path = g_strdup ("/bin/sh");
+        
+        if (access ("/system/bin/sh", X_OK) == 0)
+            mc_shell->path = g_strdup ("/system/bin/sh");
+        else
+            // Fallback and last resort: system default shell
+            mc_shell->path = g_strdup ("/bin/sh");
 
     return mc_shell;
 }

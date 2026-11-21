@@ -580,7 +580,7 @@ mc_pipe_t *
 mc_popen (const char *command, gboolean read_out, gboolean read_err, GError **error)
 {
     mc_pipe_t *p;
-    const char *const argv[] = { "/bin/sh", "sh", "-c", command, NULL };
+    const char *const argv[] = { "/system/bin/sh", "sh", "-c", command, NULL };
 
     p = g_try_new (mc_pipe_t, 1);
     if (p == NULL)

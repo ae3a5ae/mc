@@ -504,7 +504,7 @@ jobs:
             PKG_CONFIG="$PKG_CONFIG" \
             GLIB_CFLAGS="$("$PKG_CONFIG" --cflags glib-2.0)" \
             GLIB_LIBS="$("$PKG_CONFIG" --libs glib-2.0)" \
-            --prefix=/data/local/tmp/mc \
+            --prefix=/my/home/mc \
             --with-screen=ncurses \
             --with-ncurses-libdir="$PREFIX/lib" \
             --with-ncurses-includedir="$PREFIX/include" \
