@@ -525,7 +525,7 @@ jobs:
           make DESTDIR="$GITHUB_WORKSPACE/stage" install
 
           "$STRIP" --strip-unneeded \
-            "$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
+            "$GITHUB_WORKSPACE/stage/my/home/mc/bin/mc"
 
       - name: Inspect GLib and MC archives
         run: |
@@ -572,7 +572,7 @@ jobs:
 
       - name: Verify Android binary
         run: |
-          MC="$GITHUB_WORKSPACE/stage/data/local/tmp/mc/bin/mc"
+          MC="$GITHUB_WORKSPACE/stage/my/home/mc/bin/mc"
 
           file "$MC"
 
@@ -596,7 +596,7 @@ jobs:
       - name: Pack artifacts
         run: |
           tar -czf mc-android-arm64.tar.gz \
-            -C stage/data/local/tmp/mc .
+            -C stage/my/home/mc .
 
       - name: Archive artifact
         uses: actions/upload-artifact@v4
