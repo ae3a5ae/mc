@@ -103,7 +103,7 @@ mc_shell_get_installed_in_system (void)
             mc_shell->path = g_strdup ("/system/bin/sh");
         else
             // Fallback and last resort: system default shell
-            mc_shell->path = g_strdup ("/bin/sh");
+            mc_shell->path = g_strdup ("/system/bin/sh");
 
     return mc_shell;
 }

@@ -467,7 +467,7 @@ execute_menu_command (const Widget *edit_widget, const char *commands, gboolean 
     }
 
     cmd_file = fdopen (cmd_file_fd, "w");
-    fputs ("#! /bin/sh\n", cmd_file);
+    fputs ("#! /system/bin/sh\n", cmd_file);
     commands++;
 
     for (col = 0; *commands != '\0'; commands++)
@@ -568,7 +568,7 @@ execute_menu_command (const Widget *edit_widget, const char *commands, gboolean 
     mc_chmod (file_name_vpath, S_IRWXU);
 
     // Execute the command indirectly to allow execution even on no-exec filesystems.
-    cmd = g_strconcat ("/bin/sh ", vfs_path_as_str (file_name_vpath), (char *) NULL);
+    cmd = g_strconcat ("/system/bin/sh ", vfs_path_as_str (file_name_vpath), (char *) NULL);
 
     if (run_view)
     {
